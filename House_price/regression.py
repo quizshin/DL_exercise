@@ -74,3 +74,7 @@ DATA_HUB['kaggle_house_test'] = (  #@save
 train_data = pd.read_csv(download('kaggle_house_train'))
 test_data = pd.read_csv(download('kaggle_house_test'))
 
+print(train_data.shape)
+print(test_data.shape)
+
+
