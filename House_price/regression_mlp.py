@@ -100,8 +100,17 @@ train_labels = torch.tensor(
 loss = nn.MSELoss()
 in_features = train_features.shape[1]
 
+def init_weights(m):
+        if type(m) == nn.Linear:
+            nn.init.normal_(m.weight, std=0.01)
+
 def get_net():
-    net = nn.Sequential(nn.Linear(in_features,1))
+    net = nn.Sequential(nn.Flatten(),
+                        nn.Linear(in_features,512),
+                        nn.ReLU(),
+                        nn.Linear(512,1)
+    )
+    net.apply(init_weights)
     return net
 
 def log_rmse(net, features, labels):
@@ -164,12 +173,30 @@ def k_fold(k, X_train, y_train, num_epochs, learning_rate, weight_decay,
               f'验证log rmse{float(valid_ls[-1]):f}')
     return train_l_sum / k, valid_l_sum / k
 
+def train_and_pred(train_features, test_features, train_labels, test_data,
+                   num_epochs, lr, weight_decay, batch_size):
+    net = get_net()
+    train_ls, _ = train(net, train_features, train_labels, None, None,
+                        num_epochs, lr, weight_decay, batch_size)
+    d2l.plot(np.arange(1, num_epochs + 1), [train_ls], xlabel='epoch',
+             ylabel='log rmse', xlim=[1, num_epochs], yscale='log')
+    print(f'训练log rmse：{float(train_ls[-1]):f}')
+    # 将网络应用于测试集。
+    preds = net(test_features).detach().numpy()
+    # 将其重新格式化以导出到Kaggle
+    test_data['SalePrice'] = pd.Series(preds.reshape(1, -1)[0])
+    submission = pd.concat([test_data['Id'], test_data['SalePrice']], axis=1)
+    submission.to_csv('submission.csv', index=False)
 
-k, num_epochs, lr, weight_decay, batch_size = 5, 100, 5, 0, 64
+k, num_epochs, lr, weight_decay, batch_size = 5, 100, 0.01, 10, 64
 train_l, valid_l = k_fold(k, train_features, train_labels, num_epochs, lr,
                           weight_decay, batch_size)
 print(f'{k}-折验证: 平均训练log rmse: {float(train_l):f}, '
       f'平均验证log rmse: {float(valid_l):f}')
+
+
+d2l.plt.show()
+# d2l.plt.savefig('kaggle_house_price.png')
 
 
 
