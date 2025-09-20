@@ -6,6 +6,9 @@ import requests
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import logging
+import argparse
+import time
 import torch
 from torch import nn
 from d2l import torch as d2l
@@ -13,6 +16,32 @@ from d2l import torch as d2l
 #@save
 DATA_HUB = dict()
 DATA_URL = 'http://d2l-data.s3-accelerate.amazonaws.com/'
+
+def create_logger(logger_file_path):
+
+    if not os.path.exists(logger_file_path):
+        os.makedirs(logger_file_path)
+    log_name = '{}.log'.format(time.strftime('%Y-%m-%d-%H-%M'))
+    final_log_file = os.path.join(logger_file_path, log_name)
+
+    logger = logging.getLogger()  # 设定日志对象
+    logger.setLevel(logging.INFO)  # 设定日志等级
+
+    file_handler = logging.FileHandler(final_log_file)  # 文件输出
+    console_handler = logging.StreamHandler()  # 控制台输出
+
+    # 输出格式
+    formatter = logging.Formatter(
+        "%(asctime)s %(levelname)s: %(message)s "
+    )
+
+    file_handler.setFormatter(formatter)  # 设置文件输出格式
+    console_handler.setFormatter(formatter)  # 设施控制台输出格式
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    return logger
+
 
 def download(name, cache_dir=os.path.join('..', 'data')):  #@save
     """下载一个DATA_HUB中的文件，返回本地文件名"""
@@ -188,15 +217,33 @@ def train_and_pred(train_features, test_features, train_labels, test_data,
     submission = pd.concat([test_data['Id'], test_data['SalePrice']], axis=1)
     submission.to_csv('submission.csv', index=False)
 
-k, num_epochs, lr, weight_decay, batch_size = 5, 100, 0.01, 10, 64
-train_l, valid_l = k_fold(k, train_features, train_labels, num_epochs, lr,
-                          weight_decay, batch_size)
-print(f'{k}-折验证: 平均训练log rmse: {float(train_l):f}, '
-      f'平均验证log rmse: {float(valid_l):f}')
+def main():
+    parser = argparse.ArgumentParser(description="房价预测参数")
+    parser.add_argument('--k', type=int, default=5, help='k折交叉验证的折数')
+    parser.add_argument('--num_epochs', type=int, default=100, help='训练轮数')
+    parser.add_argument('--lr', type=float, default=0.01, help='学习率')
+    parser.add_argument('--weight_decay', type=float, default=10, help='权重衰减')
+    parser.add_argument('--batch_size', type=int, default=64, help='批量大小')
+    parser.add_argument('-log_path', default='./results', type=str, help='保存结果到文件')
+    args = parser.parse_args()
 
+    logger = create_logger(args.log_path)
+    logger.info('------Begin Training Model------')
 
-d2l.plt.show()
-# d2l.plt.savefig('kaggle_house_price.png')
+    train_l, valid_l = k_fold(
+        args.k, train_features, train_labels, args.num_epochs, args.lr,
+        args.weight_decay, args.batch_size
+    )
+    print(f'{args.k}-折验证: 平均训练log rmse: {float(train_l):f}, '
+          f'平均验证log rmse: {float(valid_l):f}')
+
+    logger.info('平均验证log rmse: {:.6f}'.format(valid_l))
+    d2l.plt.show()
+    # d2l.plt.savefig('kaggle_house_price.png')
+
+if __name__ == "__main__":
+    main()
+
 
 
 
