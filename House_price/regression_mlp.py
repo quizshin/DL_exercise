@@ -237,6 +237,13 @@ def main():
     print(f'{args.k}-折验证: 平均训练log rmse: {float(train_l):f}, '
           f'平均验证log rmse: {float(valid_l):f}')
 
+    logger.info(
+        '参数设置: k = {}, num_epochs = {}, lr = {}, weight_decay = {}, batch_size = {}'.format(
+            args.k, args.num_epochs, args.lr, args.weight_decay, args.batch_size
+        )
+    )
+    logger.info('')  # 插入空行
+    logger.info('平均训练log rmse: {:.6f}'.format(train_l))
     logger.info('平均验证log rmse: {:.6f}'.format(valid_l))
     d2l.plt.show()
     # d2l.plt.savefig('kaggle_house_price.png')
