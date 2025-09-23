@@ -222,7 +222,7 @@ def main():
     parser.add_argument('--k', type=int, default=5, help='k折交叉验证的折数')
     parser.add_argument('--num_epochs', type=int, default=100, help='训练轮数')
     parser.add_argument('--lr', type=float, default=0.01, help='学习率')
-    parser.add_argument('--weight_decay', type=float, default=10, help='权重衰减')
+    parser.add_argument('--weight_decay', type=float, default=0.05, help='权重衰减')
     parser.add_argument('--batch_size', type=int, default=64, help='批量大小')
     parser.add_argument('-log_path', default='./results', type=str, help='保存结果到文件')
     args = parser.parse_args()
@@ -247,6 +247,10 @@ def main():
     logger.info('平均验证log rmse: {:.6f}'.format(valid_l))
     d2l.plt.show()
     # d2l.plt.savefig('kaggle_house_price.png')
+
+    # 提交预测结果
+    train_and_pred(train_features, test_features, train_labels, test_data,
+                   args.num_epochs, args.lr, args.weight_decay, args.batch_size)
 
 if __name__ == "__main__":
     main()
