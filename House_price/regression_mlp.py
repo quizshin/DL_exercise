@@ -43,7 +43,7 @@ def create_logger(logger_file_path):
     return logger
 
 
-def download(name, cache_dir=os.path.join('..', './HOUSE_PRICE/data')):  #@save
+def download(name, cache_dir=os.path.join('..', 'data')):  #@save
     """下载一个DATA_HUB中的文件，返回本地文件名"""
     # 断言name在DATA_HUB中
     assert name in DATA_HUB, f"{name} 不存在于 {DATA_HUB}"
