@@ -17,8 +17,6 @@ transform = torchvision.transforms.Compose([
 # 加载数据集
 dataset = torchvision.datasets.ImageFolder(root=dataset_path, transform=transform)
 
-print(f"数据集大小: {len(dataset)} 张图片")
-
 
 # 按 8:2 划分训练集和测试集
 train_size = int(0.8 * len(dataset))

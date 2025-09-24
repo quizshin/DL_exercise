@@ -78,7 +78,7 @@ class ResNet34(nn.Module):
 def resnet34(num_classes=1000):
     return ResNet34(BasicBlock, [3, 4, 6, 3], num_classes=num_classes)
 
-# def main():
+#def main():
 #     model = resnet34(num_classes=1000)
 #     x = torch.randn(1, 3, 224, 224)
 #     print(f"Input shape: {x.shape}")
