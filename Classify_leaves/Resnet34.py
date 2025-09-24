@@ -78,31 +78,30 @@ class ResNet34(nn.Module):
 def resnet34(num_classes=1000):
     return ResNet34(BasicBlock, [3, 4, 6, 3], num_classes=num_classes)
 
+# def main():
+#     model = resnet34(num_classes=1000)
+#     x = torch.randn(1, 3, 224, 224)
+#     print(f"Input shape: {x.shape}")
+#     x = model.conv1(x)
+#     print(f"After conv1: {x.shape}")
+#     x = model.maxpool(x)
+#     print(f"After maxpool: {x.shape}")
 
-def main():
-    model = resnet34(num_classes=1000)
-    x = torch.randn(1, 3, 224, 224)
-    print(f"Input shape: {x.shape}")
-    x = model.conv1(x)
-    print(f"After conv1: {x.shape}")
-    x = model.maxpool(x)
-    print(f"After maxpool: {x.shape}")
+#     x = model.layer1(x)
+#     print(f"After layer1: {x.shape}")
+#     x = model.layer2(x)
+#     print(f"After layer2: {x.shape}")
+#     x = model.layer3(x)
+#     print(f"After layer3: {x.shape}")
+#     x = model.layer4(x)
+#     print(f"After layer4: {x.shape}")
 
-    x = model.layer1(x)
-    print(f"After layer1: {x.shape}")
-    x = model.layer2(x)
-    print(f"After layer2: {x.shape}")
-    x = model.layer3(x)
-    print(f"After layer3: {x.shape}")
-    x = model.layer4(x)
-    print(f"After layer4: {x.shape}")
+#     x = model.avgpool(x)
+#     print(f"After avgpool: {x.shape}")
+#     x = torch.flatten(x, 1)
+#     print(f"After flatten: {x.shape}")
+#     x = model.fc(x)
+#     print(f"After fc: {x.shape}")
 
-    x = model.avgpool(x)
-    print(f"After avgpool: {x.shape}")
-    x = torch.flatten(x, 1)
-    print(f"After flatten: {x.shape}")
-    x = model.fc(x)
-    print(f"After fc: {x.shape}")
-
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
