@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
 import torch
 import torchvision
+from tqdm import tqdm
 from torch.utils.data import Dataset, DataLoader
 from torch import nn
 from torchvision import transforms
@@ -58,9 +59,9 @@ def train(model, train_dataloader, test_dataloader, num_epochs, loss_fun, optimi
 
         # 实例化Accumulator对象，用于存储训练过程中的状态数据
         metric = assist.Accumulator(3)  # 实例化Accumulator对象，累加器列数为3，训练损失总和、训练准确度总和、样本数
-
+        loop = tqdm(enumerate(train_dataloader), total =len(train_dataloader))
         # 执行每一个batch的训练
-        for batch, (X, y) in enumerate(train_dataloader):  # 使用dataloader配合for循环，遍历每个batch
+        for batch, (X, y) in loop:  # 使用dataloader配合for循环，遍历每个batch
             timer.start()  # 开启定时器
             X, y = X.to(device), y.to(device)  # 将X， y移动至GPU
             # 计算预测值
@@ -90,13 +91,16 @@ def train(model, train_dataloader, test_dataloader, num_epochs, loss_fun, optimi
             train_loss = metric[0] / metric[2]
             train_acc = metric[1] / metric[2]
 
+            loop.set_description(f'Epoch [{epoch}/{num_epochs}]')
+            loop.set_postfix(loss = train_loss,acc = train_acc)
+            
             num_batches = len(train_dataloader)
             # %取模:返回除法的余数  //取整除:取商的整数部分
             if (batch + 1) % (num_batches // 5) == 0 or batch == num_batches - 1:
                 # 存储至Batch级的报告
                 report_batch.append([epoch + (batch + 1) / num_batches, train_loss, train_acc])
                 # Batch级绘图
-                plot_self.report_plot_batch(num_epochs, report_batch, report_epoch)
+                # plot_self.report_plot_batch(num_epochs, report_batch, report_epoch)
 
         # 利用测试集，评估当前模型，返回当前epoch的测试损失和测试精度
         test_loss, test_acc = evaluate_accuracy(test_dataloader, model, device)
@@ -104,13 +108,13 @@ def train(model, train_dataloader, test_dataloader, num_epochs, loss_fun, optimi
         scheduler.step()
 
         # 打印Epoch级的报告
-        print('train_loss:', train_loss, '\ttrain_acc', train_acc)
-        print('test_loss:', test_loss, '\ttest_acc', test_acc)
+        # print('train_loss:', train_loss, '\ttrain_acc', train_acc)
+        # print('test_loss:', test_loss, '\ttest_acc', test_acc)
         print(f'{metric[2] * num_epochs / timer.sum():.1f} examples/sec '
               f'on {str(device)}')
 
         # # # 存储至Epoch级的报告
-        # report_epoch.append([epoch + 1, train_loss, train_acc, test_loss, test_acc])
+        report_epoch.append([epoch + 1, train_loss, train_acc, test_loss, test_acc])
         # plot_self.report_plot_batch(num_epochs, report_batch, report_epoch)
 
         # # 每个Epoch将报告存储至相应csv文件中(路径：/save/文件名.csv)
@@ -135,7 +139,7 @@ def train(model, train_dataloader, test_dataloader, num_epochs, loss_fun, optimi
         # print("model_params_epoch was saved\n")
 
         # Epoch级绘图
-        # plot_self.report_plot_epoch(num_epochs, report_epoch)
+        plot_self.report_plot_epoch(num_epochs, report_epoch)
 
 # # 计算准确率
 # 对于任意数据迭代器dataloader可访问的数据集，评估在任意模型上的准确率
@@ -170,7 +174,7 @@ def evaluate_accuracy(test_dataloader, model, device):
 # # 定义超参数
 learning_rate = 1e-4
 batch_size = 128
-num_epochs = 300
+num_epochs = 100
 weight_decay = 1e-3
 
 # # 创建划分好的训练集和测试集
