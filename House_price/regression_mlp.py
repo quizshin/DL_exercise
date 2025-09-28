@@ -17,11 +17,11 @@ from d2l import torch as d2l
 DATA_HUB = dict()
 DATA_URL = 'http://d2l-data.s3-accelerate.amazonaws.com/'
 
-def create_logger(logger_file_path):
-
+def create_logger(logger_file_path, log_file_name=None):
     if not os.path.exists(logger_file_path):
         os.makedirs(logger_file_path)
-    log_name = '{}.log'.format(time.strftime('%Y-%m-%d-%H-%M'))
+    # 如果提供了日志文件名，则使用该文件名，否则使用默认的时间戳命名
+    log_name = log_file_name if log_file_name else '{}.log'.format(time.strftime('%Y-%m-%d-%H-%M'))
     final_log_file = os.path.join(logger_file_path, log_name)
 
     logger = logging.getLogger()  # 设定日志对象
@@ -36,7 +36,7 @@ def create_logger(logger_file_path):
     )
 
     file_handler.setFormatter(formatter)  # 设置文件输出格式
-    console_handler.setFormatter(formatter)  # 设施控制台输出格式
+    console_handler.setFormatter(formatter)  # 设置控制台输出格式
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
@@ -225,9 +225,10 @@ def main():
     parser.add_argument('--weight_decay', type=float, default=0.05, help='权重衰减')
     parser.add_argument('--batch_size', type=int, default=64, help='批量大小')
     parser.add_argument('-log_path', default='./results', type=str, help='保存结果到文件')
+    parser.add_argument('--log_file_name', default='ba64_lr001', type=str, help='日志文件的名称（可选）')
     args = parser.parse_args()
 
-    logger = create_logger(args.log_path)
+    logger = create_logger(args.log_path, args.log_file_name)
     logger.info('------Begin Training Model------')
 
     train_l, valid_l = k_fold(
